@@ -8,20 +8,14 @@ import re
 import argparse
 import sys
 import logging
+from datetime import datetime
 from pprint import pprint as pp
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', help='URL to lookup', default='http://s3.amazonaws.com/cuny-is211-spring2015/weblog.csv')
     args = parser.parse_args()
-    try:
-        csvdata = downloadData(args.url)
-    except HTTPError as h:
-        logger.error(h)
-        sys.exit()
-    except URLError:
-        logger.error('Unable to retrieve CSV file')
-        sys.exit()
+    csvdata = downloadData(args.url)
     weblog = processData(csvdata)
     imageSearch(weblog)
     browserSearch(weblog)
@@ -29,8 +23,15 @@ def main():
 
 def downloadData(url):
     """Download the CSV at the url provided, return a CSV reader object"""
-    req = Request(url)
-    response = urlopen(req)
+    try:
+        req = Request(url)
+        response = urlopen(req)
+    except HTTPError as h:
+        logger.error(h)
+        sys.exit()
+    except URLError:
+        logger.error('Unable to retrieve CSV file')
+        sys.exit()
     return csv.DictReader(response, fieldnames = ("filepath","datetime","browser","status","request_size"))
 
 def processData(datafile):
@@ -44,27 +45,37 @@ def imageSearch(datafile):
     for row in datafile:
         for k,v in row.items():
             if k == 'filepath':
-                if re.search('\.(jpg|png|gif|jpeg)', v, re.IGNORECASE):
+                if re.search('\.(jpg|png|gif)', v, re.IGNORECASE):
                     images += 1
     print('Image requests account for {}% of all requests').format(images/len(datafile)*100)
 
 def browserSearch(datafile):
-    browsers = {'firefox': 0, 'chrome': 0, 'ie': 0, 'safari': 0}
+    browsers = {'Firefox': 0, 'Chrome': 0, 'Internet Explorer': 0, 'Safari': 0}
     for row in datafile:
         for k, v in row.items():
             if k == 'browser':
                 if re.search('firefox', v , re.IGNORECASE):
-                    browsers['firefox'] += 1
+                    browsers['Firefox'] += 1
                 if re.search('chrome', v, re.IGNORECASE):
-                    browsers['chrome'] += 1
+                    browsers['Chrome'] += 1
                 if re.search('ie', v, re.IGNORECASE):
-                    browsers['ie'] += 1
+                    browsers['Internet Explorer'] += 1
                 if re.search('safari', v, re.IGNORECASE):
-                    browsers['safari'] += 1
-    print max(browsers, key=browsers.get)
+                    browsers['Safari'] += 1
+    print("The most popular browser of the day is {}.").format(max(browsers, key=browsers.get))
 
 def timeSearch(datafile):
-    print "timesearch"
+    activehours = {}
+    for row in datafile:
+        for k, v in row.items():
+            if k == 'datetime':
+                dt = datetime.strptime(v,'%Y-%m-%d %H:%M:%S')
+                if dt.hour in activehours:
+                    activehours[dt.hour] += 1
+                else:
+                    activehours[dt.hour] = 1
+    for k,v in activehours.items():
+        print("Hour {} has {} hits").format(k, v)
 
 if __name__ == '__main__':
     logger = logging.getLogger('assignment3')
