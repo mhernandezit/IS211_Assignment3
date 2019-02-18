@@ -71,7 +71,7 @@ def browserSearch(datafile):
     print("The most popular browser of the day is {}.").format(max(browsers, key=browsers.get))
 
 def timeSearch(datafile):
-    """Builds a time dictionary that tracks hits based off of time """
+    """Builds a time dictionary that tracks hits based off of hours """
     activehours = {}
     for row in datafile:
         for key, value in row.items():
@@ -81,6 +81,7 @@ def timeSearch(datafile):
                     activehours[dFormat.hour] += 1
                 else:
                     activehours[dFormat.hour] = 1
+    #Loop through 24 hours of the day, for any hours that return None, report 0
     for hour in xrange(0, 24):
         print("Hour {} has {} hits").format(hour, activehours.get(hour, 0))
 
