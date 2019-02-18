@@ -15,7 +15,7 @@ TESTURL = 'http://s3.amazonaws.com/cuny-is211-spring2015/weblog.csv'
 def main():
     """Main method"""
     parser = argparse.ArgumentParser()
-    parser.add_argument('--url', help='URL to lookeyup', default=TESTURL)
+    parser.add_argument('--url', help='URL to lookup', default=TESTURL)
     args = parser.parse_args()
     csvdata = downloadData(args.url)
     weblog = processData(csvdata)
