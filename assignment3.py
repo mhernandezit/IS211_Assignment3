@@ -13,7 +13,7 @@ from datetime import datetime
 TESTURL = 'http://s3.amazonaws.com/cuny-is211-spring2015/weblog.csv'
 
 def main():
-    """Main method"""
+    """Main method - using a default --url argument """
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', help='URL to lookup', default=TESTURL)
     args = parser.parse_args()
@@ -71,7 +71,7 @@ def browserSearch(datafile):
     print("The most popular browser of the day is {}.").format(max(browsers, key=browsers.get))
 
 def timeSearch(datafile):
-    """Builds a time dictionary that trackeys hits based off of time """
+    """Builds a time dictionary that tracks hits based off of time """
     activehours = {}
     for row in datafile:
         for key, value in row.items():
