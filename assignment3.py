@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding: iso-8859-15 -*-
+# -*- coding: utf-8 -*-
 """ Assignment 3 - Using RegEx to parse a CSV file """
 from __future__ import division
 from urllib2 import Request, urlopen, URLError, HTTPError
@@ -52,7 +52,7 @@ def imageSearch(datafile):
             if key == 'filepath':
                 if re.search('.(jpg|png|gif|jpeg)', value, re.IGNORECASE):
                     images += 1
-    print('Image requests account for {}% of all requests').format(images/len(datafile)*100)
+    print("Image requests account for {}% of all requests").format(images/len(datafile)*100)
 
 def browserSearch(datafile):
     """Searches datafile for Browsers in the text fields """
