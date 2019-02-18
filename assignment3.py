@@ -9,11 +9,13 @@ import argparse
 import sys
 import logging
 from datetime import datetime
-from pprint import pprint as pp
+
+TESTURL = 'http://s3.amazonaws.com/cuny-is211-spring2015/weblog.csv'
 
 def main():
+    """Main method"""
     parser = argparse.ArgumentParser()
-    parser.add_argument('--url', help='URL to lookup', default='http://s3.amazonaws.com/cuny-is211-spring2015/weblog.csv')
+    parser.add_argument('--url', help='URL to lookeyup', default=TESTURL)
     args = parser.parse_args()
     csvdata = downloadData(args.url)
     weblog = processData(csvdata)
@@ -26,66 +28,71 @@ def downloadData(url):
     try:
         req = Request(url)
         response = urlopen(req)
-    except HTTPError as h:
-        logger.error(h)
+    except HTTPError as error:
+        LOGGER.error(error)
         sys.exit()
     except URLError:
-        logger.error('Unable to retrieve CSV file')
+        LOGGER.error('Unable to retrieve CSV file')
         sys.exit()
-    return csv.DictReader(response, fieldnames = ("filepath","datetime","browser","status","request_size"))
+    fieldnames = ("filepath", "datetime", "browser", "status", "request_size")
+    return csv.DictReader(response, fieldnames=fieldnames)
 
 def processData(datafile):
-    dict_list = []
+    """Build out a list of dictionaries from the csvDict object """
+    dictList = []
     for line in datafile:
-        dict_list.append(line)
-    return dict_list
+        dictList.append(line)
+    return dictList
 
 def imageSearch(datafile):
+    """Searches values for extensions ending in jpg, png and gif, ignoring case """
     images = 0
     for row in datafile:
-        for k,v in row.items():
-            if k == 'filepath':
-                if re.search('\.(jpg|png|gif)', v, re.IGNORECASE):
+        for key, value in row.items():
+            if key == 'filepath':
+                if re.search('.(jpg|png|gif)', value, re.IGNORECASE):
                     images += 1
     print('Image requests account for {}% of all requests').format(images/len(datafile)*100)
 
 def browserSearch(datafile):
+    """Searches datafile for Browsers in the text fields """
     browsers = {'Firefox': 0, 'Chrome': 0, 'Internet Explorer': 0, 'Safari': 0}
     for row in datafile:
-        for k, v in row.items():
-            if k == 'browser':
-                if re.search('firefox', v , re.IGNORECASE):
+        for key, value in row.items():
+            if key == 'browser':
+                if re.search('firefox', value, re.IGNORECASE):
                     browsers['Firefox'] += 1
-                if re.search('chrome', v, re.IGNORECASE):
+                if re.search('chrome', value, re.IGNORECASE):
                     browsers['Chrome'] += 1
-                if re.search('ie', v, re.IGNORECASE):
+                if re.search('ie', value, re.IGNORECASE):
                     browsers['Internet Explorer'] += 1
-                if re.search('safari', v, re.IGNORECASE):
+                if re.search('safari', value, re.IGNORECASE):
                     browsers['Safari'] += 1
     print("The most popular browser of the day is {}.").format(max(browsers, key=browsers.get))
 
 def timeSearch(datafile):
+    """Builds a time dictionary that trackeys hits based off of time """
     activehours = {}
     for row in datafile:
-        for k, v in row.items():
-            if k == 'datetime':
-                dt = datetime.strptime(v,'%Y-%m-%d %H:%M:%S')
-                if dt.hour in activehours:
-                    activehours[dt.hour] += 1
+        for key, value in row.items():
+            if key == 'datetime':
+                dFormat = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+                if dFormat.hour in activehours:
+                    activehours[dFormat.hour] += 1
                 else:
-                    activehours[dt.hour] = 1
-    for k,v in activehours.items():
-        print("Hour {} has {} hits").format(k, v)
+                    activehours[dFormat.hour] = 1
+    for hour in xrange(0, 24):
+        print("Hour {} has {} hits").format(hour, activehours.get(hour, 0))
 
 if __name__ == '__main__':
-    logger = logging.getLogger('assignment3')
-    logger.setLevel(logging.ERROR)
+    LOGGER = logging.getLogger('assignment3')
+    LOGGER.setLevel(logging.ERROR)
     try:
-        logFile = logging.FileHandler('errors.log')
+        LOGFILE = logging.FileHandler('errors.log')
     except IOError:
         print "Unable to open log file"
-    logFile.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    logFile.setFormatter(formatter)
-    logger.addHandler(logFile)
+    LOGFILE.setLevel(logging.DEBUG)
+    FORMATTER = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    LOGFILE.setFormatter(FORMATTER)
+    LOGGER.addHandler(LOGFILE)
     main()
