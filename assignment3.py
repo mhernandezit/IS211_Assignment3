@@ -50,7 +50,7 @@ def imageSearch(datafile):
     for row in datafile:
         for key, value in row.items():
             if key == 'filepath':
-                if re.search('.(jpg|png|gif)', value, re.IGNORECASE):
+                if re.search('.(jpg|png|gif|jpeg)', value, re.IGNORECASE):
                     images += 1
     print('Image requests account for {}% of all requests').format(images/len(datafile)*100)
 
