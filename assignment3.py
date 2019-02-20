@@ -28,7 +28,7 @@ def main():
     timeSearch(weblog) # search the dictionary for entries by hour
 
 def downloadData(url):
-    """Download the CSV at the url provided, return a CSV reader object"""
+    """Download the CSV at the url provided, return a URLlib response object"""
     try:
         req = Request(url)
         response = urlopen(req)
