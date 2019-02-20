@@ -23,9 +23,7 @@ def main():
         LOGGER.error("No URL entered, please use the --url argument")
         sys.exit()
     weblog = processData(csvdata) # turn the csv into a dictionary
-    imageSearch(weblog) # search the dictionary for images
-    browserSearch(weblog) # search the dictionary for browsers
-    timeSearch(weblog) # search the dictionary for entries by hour
+    dataSearch(weblog)
 
 def downloadData(url):
     """Download the CSV at the url provided, return a CSV reader object"""
@@ -49,15 +47,40 @@ def processData(csvdata):
         dictList.append(line)
     return dictList
 
-def imageSearch(datafile):
+def dataSearch(datafile):
     """Searches values for extensions ending in jpg, png and gif, ignoring case """
     images = 0
+    browsers = {'Firefox': 0, 'Chrome': 0, 'Internet Explorer': 0, 'Safari': 0}
+    activehours = {}
+
     for row in datafile:
         for key, value in row.items():
             if key == 'filepath':
                 if re.search('.(jpg|png|gif|jpeg)', value, re.IGNORECASE):
                     images += 1
+            elif key == 'browser':
+                if re.search('firefox', value, re.IGNORECASE):
+                    browsers['Firefox'] += 1
+                elif re.search('chrome', value, re.IGNORECASE):
+                    browsers['Chrome'] += 1
+                elif re.search('ie', value, re.IGNORECASE):
+                    browsers['Internet Explorer'] += 1
+                elif re.search('safari', value, re.IGNORECASE):
+                    browsers['Safari'] += 1
+            elif key == 'datetime':
+                dFormat = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+                if dFormat.hour in activehours:
+                    activehours[dFormat.hour] += 1
+                else:
+                    activehours[dFormat.hour] = 1
+            else:
+                pass
+
     print("Image requests account for {}% of all requests").format(images/len(datafile)*100)
+    print("The most popular browser of the day is {}.").format(max(browsers, key=browsers.get))
+    for hour in xrange(0, 24):
+        print("Hour {} has {} hits").format(hour, activehours.get(hour, 0))
+
 
 def browserSearch(datafile):
     """Searches datafile for Browsers in the text fields """
@@ -67,12 +90,14 @@ def browserSearch(datafile):
             if key == 'browser':
                 if re.search('firefox', value, re.IGNORECASE):
                     browsers['Firefox'] += 1
-                if re.search('chrome', value, re.IGNORECASE):
+                elif re.search('chrome', value, re.IGNORECASE):
                     browsers['Chrome'] += 1
-                if re.search('ie', value, re.IGNORECASE):
+                elif re.search('ie', value, re.IGNORECASE):
                     browsers['Internet Explorer'] += 1
-                if re.search('safari', value, re.IGNORECASE):
+                elif re.search('safari', value, re.IGNORECASE):
                     browsers['Safari'] += 1
+                else:
+                    pass
     print("The most popular browser of the day is {}.").format(max(browsers, key=browsers.get))
 
 def timeSearch(datafile):
