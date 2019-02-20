@@ -68,50 +68,14 @@ def dataSearch(datafile):
                 elif re.search('safari', value, re.IGNORECASE):
                     browsers['Safari'] += 1
             elif key == 'datetime':
-                dFormat = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
-                if dFormat.hour in activehours:
-                    activehours[dFormat.hour] += 1
+                dateFormat = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+                if dateFormat.hour in activehours:
+                    activehours[dateFormat.hour] += 1
                 else:
-                    activehours[dFormat.hour] = 1
-            else:
-                pass
+                    activehours[dateFormat.hour] = 1
 
     print("Image requests account for {}% of all requests").format(images/len(datafile)*100)
     print("The most popular browser of the day is {}.").format(max(browsers, key=browsers.get))
-    for hour in xrange(0, 24):
-        print("Hour {} has {} hits").format(hour, activehours.get(hour, 0))
-
-
-def browserSearch(datafile):
-    """Searches datafile for Browsers in the text fields """
-    browsers = {'Firefox': 0, 'Chrome': 0, 'Internet Explorer': 0, 'Safari': 0}
-    for row in datafile:
-        for key, value in row.items():
-            if key == 'browser':
-                if re.search('firefox', value, re.IGNORECASE):
-                    browsers['Firefox'] += 1
-                elif re.search('chrome', value, re.IGNORECASE):
-                    browsers['Chrome'] += 1
-                elif re.search('ie', value, re.IGNORECASE):
-                    browsers['Internet Explorer'] += 1
-                elif re.search('safari', value, re.IGNORECASE):
-                    browsers['Safari'] += 1
-                else:
-                    pass
-    print("The most popular browser of the day is {}.").format(max(browsers, key=browsers.get))
-
-def timeSearch(datafile):
-    """Builds a time dictionary that tracks hits based off of hours """
-    activehours = {}
-    for row in datafile:
-        for key, value in row.items():
-            if key == 'datetime':
-                dFormat = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
-                if dFormat.hour in activehours:
-                    activehours[dFormat.hour] += 1
-                else:
-                    activehours[dFormat.hour] = 1
-    #Loop through 24 hours of the day, for any hours that return None, report 0
     for hour in xrange(0, 24):
         print("Hour {} has {} hits").format(hour, activehours.get(hour, 0))
 
