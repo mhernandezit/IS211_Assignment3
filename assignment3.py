@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """ Assignment 3 - Using RegEx to parse a CSV file """
-from __future__ import division
+from __future__ import division # I don't want to do integer division for the % later on
 from urllib2 import Request, urlopen, URLError, HTTPError
 import csv
 import re
@@ -17,11 +17,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', help='URL to lookup', default=TESTURL)
     args = parser.parse_args()
-    csvdata = downloadData(args.url)
-    weblog = processData(csvdata)
-    imageSearch(weblog)
-    browserSearch(weblog)
-    timeSearch(weblog)
+    if args:
+        csvdata = downloadData(args.url)
+    else:
+        LOGGER.error("No URL entered, please use the --url argument")
+        sys.exit()
+    weblog = processData(csvdata) # turn the csv into a dictionary
+    imageSearch(weblog) # search the dictionary for images
+    browserSearch(weblog) # search the dictionary for browsers
+    timeSearch(weblog) # search the dictionary for entries by hour
 
 def downloadData(url):
     """Download the CSV at the url provided, return a CSV reader object"""
@@ -34,11 +38,12 @@ def downloadData(url):
     except URLError:
         LOGGER.error('Unable to retrieve CSV file')
         sys.exit()
-    fieldnames = ("filepath", "datetime", "browser", "status", "request_size")
-    return csv.DictReader(response, fieldnames=fieldnames)
+    return response
 
-def processData(datafile):
-    """Build out a list of dictionaries from the csvDict object """
+def processData(csvdata):
+    """Build out a list of dictionaries from the csv object """
+    fieldnames = ("filepath", "datetime", "browser", "status", "request_size")
+    datafile = csv.DictReader(csvdata, fieldnames=fieldnames)
     dictList = []
     for line in datafile:
         dictList.append(line)
